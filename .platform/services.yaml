@@ -1,0 +1,23 @@
+# The services of the project.
+#
+# Each service listed will be deployed in its own container as part of your
+# Platform.sh project.
+#
+# See https://docs.platform.sh/user_guide/reference/services-yaml.html
+
+dbpostgres:
+    type: postgresql:14
+    disk: 1024
+# the redis is used by sidekiq so it should be persistent
+# and should have noevicition policy.
+cache:
+    type: redis-persistent:6.0
+    disk: 256
+    configuration:
+        maxmemory_policy: noeviction
+searchelastic:
+    type: elasticsearch:7.10
+    disk: 1024
+files:
+    type: network-storage:2.0
+    disk: 1024

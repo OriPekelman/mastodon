@@ -1,0 +1,107 @@
+# This is a sample configuration file. You can generate your configuration
+# with the `rake mastodon:setup` interactive setup wizard, but to customize
+# your setup even further, you'll need to edit it manually. This sample does
+# not demonstrate all available configuration options. Please look at
+# https://docs.joinmastodon.org/admin/config/ for the full documentation.
+
+# Note that this file accepts slightly different syntax depending on whether
+# you are using `docker-compose` or not. In particular, if you use
+# `docker-compose`, the value of each declared variable will be taken verbatim,
+# including surrounding quotes.
+# See: https://github.com/mastodon/mastodon/issues/16895
+
+# Federation
+# ----------
+# This identifies your server and cannot be changed safely later
+# ----------
+# Platform.sh: Extract primary route and from it the host.
+export LOCAL_DOMAIN=$(echo $PLATFORM_ROUTES | base64 --decode | jq -r 'to_entries[] | select(.value.primary == true) | .key' | awk -F/ '{print $3}')
+# Platform.sh: this is potentially useful 
+if [ "$PLATFORM_ENVIRONMENT_TYPE" != production ]; then # Run commands only when deploying to production
+export RAILS_DEVELOPMENT_HOSTS=$(echo $LOCAL_DOMAIN | cut -d . -f 2- )
+fi
+
+# Redis
+# -----
+# Platform.sh: The Rails gem should take care of this, considering testing
+# without the following lines
+export REDIS_HOST=cache.internal
+export REDIS_PORT=6379
+
+# PostgreSQL
+# ----------
+# Platform.sh: The Rails gem should take care of this, considering testing
+# without the following lines
+export DB_HOST=database.internal
+export DB_USER=main
+export DB_NAME=main
+export DB_PASS=main
+export DB_PORT=5432
+
+# Elasticsearch (optional)
+# ------------------------
+export ES_ENABLED=true
+# Platform.sh: The Rails gem should take care of this, considering testing
+# without the following lines
+export ES_HOST=search.internal
+export ES_PORT=9200
+# Authentication for ES (optional)
+#export ES_USER=user
+#export ES_PASS=
+
+# Secrets
+# -------
+# Make sure to use `rake secret` to generate secrets
+# -------
+# Platform.sh: SECRET_KEY_BASE is exported from the base app
+# based on PLATFORM_ENTROPY
+export OTP_SECRET=OTP-$SECRET_KEY_BASE
+
+# Web Push
+# --------
+# Generate with `rake mastodon:webpush:generate_vapid_key`
+# --------
+# Platform.sh: These are set using `platform variable:set`
+# and are accessible in the console.
+#export VAPID_PRIVATE_KEY=
+#export VAPID_PUBLIC_KEY=
+
+# Sending mail
+# ------------
+# Platform.sh: Use integrated smtp
+export SMTP_SERVER=$PLATFORM_SMTP_HOST
+#SMTP_PORT=587
+#SMTP_LOGIN=
+#SMTP_PASSWORD=
+# Platform.sh TODO: Not yet configured
+export SMTP_FROM_ADDRESS=notifications@example.com
+
+# File storage (optional)
+# -----------------------
+# Platform.sh: TODO: Not yet configured
+#S3_ENABLED=false
+#S3_BUCKET=files.example.com
+#AWS_ACCESS_KEY_ID=
+#AWS_SECRET_ACCESS_KEY=
+#S3_ALIAS_HOST=files.example.com
+
+# IP and session retention
+# -----------------------
+# Make sure to modify the scheduling of ip_cleanup_scheduler in config/sidekiq.yml
+# to be less than daily if you lower IP_RETENTION_PERIOD below two days (172800).
+# -----------------------
+export IP_RETENTION_PERIOD=31556952
+export SESSION_RETENTION_PERIOD=31556952
+
+# Platform.sh local storage
+export PAPERCLIP_ROOT_PATH=/app/public/system
+
+#Platform.sh: TODO: We may need this: 
+#TRUSTED_PROXY_IP= (and the IP of the router? Or nuntius?) Have a look
+
+#Platform.sh: TODO: We may want to have everyone authenticate with Platform.sh?
+#Basically if you are a platform.sh user get to have a mastodon account?
+#OAUTH_REDIRECT_AT_SIGN_IN=?
+
+#Platform.sh:
+export PATH=$PATH:$PLATFORM_APP_DIR/bin

@@ -1,0 +1,94 @@
+# This file describes an application. You can have multiple applications
+# in the same project.
+#
+# See https://docs.platform.sh/user_guide/reference/platform-app-yaml.html
+
+# The name of this app. Must be unique within a project.
+name: 'app'
+
+# The runtime the application uses.
+type: "ruby:3.0"
+dependencies:
+  nodejs:
+    n: "*"
+variables:
+    env:
+        N_PREFIX: /app/.global
+        RACK_ENV: production
+        RAILS_ENV: production
+        OTP_SECRET: changethislater #I also put it in env ..but this is just so the template deploys
+# The configuration of app when it is exposed to the web.
+web:
+    upstream:
+       # Send requests to the app server through a unix socket, whose location
+       # will be defined in an environment variable named SOCKET.
+       socket_family: "unix"
+    # Commands are run once after deployment to start the application process.
+    commands:
+      start: BIND=0.0.0.0 bundle exec puma -C config/puma.rb
+
+    # The folder from which to serve static assets, for this location.
+    #
+    # This is a filesystem path, relative to the application root.
+    locations:
+        "/":
+            root: "public"
+            passthru: true
+            expires: 1h
+            allow: true
+        "/api/v1/streaming/":
+            root: "public"
+            passthru: true
+            allow: true
+            request_buffering:
+                enabled: false
+relationships:
+    database: "dbpostgres:postgresql"
+    cache: "cache:redis"
+    search: "searchelastic:elasticsearch"
+# The mounts that will be performed when the package is deployed.
+mounts:
+   "/log": "shared:files/log"
+   "/tmp": "shared:files/tmp"
+   "/public/system":
+        source: service
+        service: files
+        source_path: storage
+# The size of the persistent disk of the application (in MB).
+disk: 2048
+
+# The hooks executed at various points in the lifecycle of the application.
+hooks:
+    # The build hook runs before the application is deployed, and is useful for
+    # assembling the codebase.
+    build: |
+        # Exit the hook on any failure
+        set -e
+        # Install the version specified in the .nvmrc file
+        # Reset the location hash to recognize the newly installed version
+        n auto
+        hash -r
+        # Install Ruby deps
+        bundle install
+        # Install nodejs deps
+        corepack enable
+        yarn set version stable
+        yarn install
+        # Compile assets
+        bundle exec rake assets:precompile
+    # We run deploy hook after your application has been deployed and started.
+    deploy: |
+        bundle exec rake db:migrate
+crons:
+    media:
+        spec: '0 0 * * 0'
+        commands:
+            start: bundle exec bin/tootctl media remove
+    preview_cards:
+        spec: '0 0 * * 0'
+        commands:
+            start: bundle exec bin/tootctl preview_cards remove
+workers:
+    sidekiq:
+        commands:
+            start: bundle exec sidekiq
