@@ -59,3 +59,12 @@ to get out of single user mode and to start federating.
 export DISALLOW_UNAUTHENTICATED_API_ACCESS=true
 export SINGLE_USER_MODE=true
 ```
+
+You will want to make sure that the streaming api ends-up authorized with something like
+```
+Rails.application.configure do
+  config.hosts <<  "streaming.example.com"
+end
+```
+
+in your `/config/environments/production.rb`
