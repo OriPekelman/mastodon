@@ -16,6 +16,8 @@
 # ----------
 # Platform.sh: Extract primary route and from it the host.
 export LOCAL_DOMAIN=$(echo $PLATFORM_ROUTES | base64 --decode | jq -r 'to_entries[] | select(.value.primary == true) | .key' | awk -F/ '{print $3}')
+export STREAMING_API_BASE=$(echo $PLATFORM_ROUTES | base64 --decode | jq -r 'to_entries[] | select(.value.id == "streaming") | .key' | awk -F/ '{print $3}')
+export STREAMING_API_BASE_URL = "wss://$STREAMING_API_BASE"
 # Platform.sh: this is potentially useful 
 if [ "$PLATFORM_ENVIRONMENT_TYPE" != production ]; then # Run commands only when deploying to production
 export RAILS_DEVELOPMENT_HOSTS=$(echo $LOCAL_DOMAIN | cut -d . -f 2- )
@@ -105,3 +107,9 @@ export PAPERCLIP_ROOT_PATH=/app/public/system
 
 #Platform.sh:
 export PATH=$PATH:$PLATFORM_APP_DIR/bin
+
+
+# Platform.sh somewhat paranoid settings for default installation.
+export DISALLOW_UNAUTHENTICATED_API_ACCESS=true
+export SINGLE_USER_MODE=true
+

@@ -7,7 +7,8 @@
 "http://{default}/":
     type: upstream
     upstream: "app:http"
-"https://{default}/api/v1/streaming/":
+"https://streaming.{default}":
+    id: "streaming"
     type: upstream
     upstream: "app:http"
     cache:
