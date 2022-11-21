@@ -20,7 +20,7 @@ export STREAMING_API_BASE=$(echo $PLATFORM_ROUTES | base64 --decode | jq -r 'to_
 export STREAMING_API_BASE_URL="wss://$STREAMING_API_BASE"
 # Platform.sh: this is potentially useful 
 if [ "$PLATFORM_ENVIRONMENT_TYPE" != production ]; then # Run commands only when deploying to production
-export RAILS_DEVELOPMENT_HOSTS=$(echo $LOCAL_DOMAIN | cut -d . -f 2- )
+export RAILS_DEVELOPMENT_HOSTS=$(echo $LOCAL_DOMAIN | cut -d . -f 2- ),$STREAMING_API_BASE
 fi
 
 # Redis
