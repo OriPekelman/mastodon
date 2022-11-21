@@ -108,8 +108,6 @@ export PAPERCLIP_ROOT_PATH=/app/public/system
 #Platform.sh:
 export PATH=$PATH:$PLATFORM_APP_DIR/bin
 
-
-# Platform.sh somewhat paranoid settings for default installation.
-export DISALLOW_UNAUTHENTICATED_API_ACCESS=true
-export SINGLE_USER_MODE=true
-
+# Single user undefederated modes
+#export DISALLOW_UNAUTHENTICATED_API_ACCESS=true
+#export SINGLE_USER_MODE=true
