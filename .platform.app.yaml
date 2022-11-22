@@ -94,3 +94,13 @@ workers:
     sidekiq:
         commands:
             start: bundle exec sidekiq
+source:
+    operations:
+        auto-update:
+            command: |
+                set -e
+                git remote add upstream git@github.com:mastodon/mastodon.git
+                git fetch upstream
+                LATEST_VERSION=$(git tag -l --format "%(refname:short)" --sort=-version:refname | grep -vwE "(rc|beta)"~|head -n1)
+                echo "Updating to version $LATEST_VERSION"
+                git rebase $LATEST_VERSION
