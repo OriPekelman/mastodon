@@ -11,6 +11,8 @@ type: "ruby:3.0"
 dependencies:
   nodejs:
     n: "*"
+  ruby:
+    platform_sh_rails: "*"    
 variables:
     env:
         N_PREFIX: /app/.global
